@@ -1,5 +1,8 @@
 package org.launchcode.controllers;
 
+import org.launchcode.models.Job;
+import org.launchcode.models.JobFieldType;
+import org.launchcode.models.data.JobFieldData;
 import org.launchcode.models.forms.JobForm;
 import org.launchcode.models.data.JobData;
 import org.springframework.stereotype.Controller;
@@ -20,10 +23,11 @@ public class JobController {
     private JobData jobData = JobData.getInstance();
 
     // The detail display for a given Job at URLs like /job?id=17
-    @RequestMapping(value = "", method = RequestMethod.GET)
+    @RequestMapping(value = "job", method = RequestMethod.GET)
     public String index(Model model, int id) {
 
         // TODO #1 - get the Job with the given ID and pass it into the view
+        model.addAttribute("job", jobData.findById(id));
 
         return "job-detail";
     }
@@ -37,11 +41,21 @@ public class JobController {
     @RequestMapping(value = "add", method = RequestMethod.POST)
     public String add(Model model, @Valid JobForm jobForm, Errors errors) {
 
-        // TODO #6 - Validate the JobForm model, and if valid, create a
-        // new Job and add it to the jobData data store. Then
-        // redirect to the job detail view for the new Job.
+        // TODO #6 - Validate the JobForm model
+        if(errors.hasErrors()){
+            return "add";
+        }
+        Job job = new Job();
+        job.setCoreCompetency(jobForm.getCoreCompetencies().get(jobForm.getCoreCompetencyId()));
+        job.setEmployer(jobForm.getEmployers().get(jobForm.getEmployerId()));
+        job.setLocation(jobForm.getLocations().get(jobForm.getLocationId()));
+        job.setName(jobForm.getName());
+        job.setPositionType(jobForm.getPositionTypes().get(jobForm.getPositionTypeId()));
+        jobData.add(job);
+        // and if valid create a new Job and add it to the jobData data store.
+        // Then redirect to the job detail view for the new Job.
 
-        return "";
+        return "redirect:job?id="+job.getId();
 
     }
 }
